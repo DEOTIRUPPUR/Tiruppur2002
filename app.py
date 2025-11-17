@@ -20,14 +20,14 @@ body {
 
 /* Header style */
 h2 {
-    color: ##6a64ef;
+    color: #6a64ef;
     text-align: center;
     text-shadow: 1px 1px 2px #aaa;
 }
 
 /* Button style */
 .stButton > button {
-    background-color: ##c19962;
+    background-color: #c19962;
     color: white;
     font-weight: bold;
     border-radius: 10px;
