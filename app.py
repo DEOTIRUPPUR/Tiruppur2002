@@ -47,7 +47,7 @@ FILE_MAP = {
     "113 - வெள்ளகோவில் (Vellakoil)": "AC_105_Coimbatore(West).parquet",
     "114 - பொங்கலூர் (Pongalur)": "AC_114_Pongalur.parquet",
     "115 - பல்லடம் (Palladam)": "AC_115_Palladam.parquet",
-    "116 - திருப்பூர் (Tiruppur)": "AC_108_Kinathukadavu.parquet",
+    "116 - திருப்பூர் (Tiruppur)": "AC_116_Tiruppur.parquet",
     "117 - காங்கேயம் (Kangayam)": "AC_117_Kangayam.parquet",
 }
 
