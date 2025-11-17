@@ -69,7 +69,7 @@ input[type="text"] {
 # HEADER
 # ----------------------------------------
 st.markdown("""
-<div style='height:33px;'></div>
+<div style='height:45px;'></div>
 <h2 style="color: #6a64ef;">
     திருப்பூர் மாவட்ட வாக்காளர் விவரம் - 2002
 </h2>
