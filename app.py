@@ -32,7 +32,7 @@ st.markdown(
     <div style='height:25px;'></div>
     <h2 style='width:100%; text-align:center; font-size:1.6rem;
                white-space:normal; line-height:2.2rem; margin-top:10px;'>
-        🗳️ கோயம்புத்தூர் மாவட்ட வாக்காளர் விவரம் - 2002
+        திருப்பூர் மாவட்ட வாக்காளர் விவரம் - 2002
     </h2>
     """,
     unsafe_allow_html=True
@@ -42,7 +42,7 @@ st.markdown(
 # FILE MAP WITH TAMIL SPELLINGS
 # ----------------------------------------
 FILE_MAP = {
-    "101 - மேட்டுப்பாளையம் (Mettupalayam)": "AC_101_Mettupalayam.parquet",
+    "102 - அவநாசி (தனி) (AVANASHI (sc)": "AC_101_Mettupalayam.parquet",
     "103 - தொண்டாமுத்தூர் (Thondamuthur)": "AC_103_Thondamuthur.parquet",
     "104 - சிங்காநல்லூர் (Singanallur)": "AC_104_Singanallur.parquet",
     "105 - கோயம்புத்தூர் மேற்கு (West)": "AC_105_Coimbatore(West).parquet",
