@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import traceback
 
 # ----------------------------------------
 # PAGE SETTINGS + MOBILE CSS
@@ -53,7 +54,7 @@ FILE_MAP = {
 }
 
 # ----------------------------------------
-# PRELOAD PARQUET FILES
+# PRELOAD PARQUET FILES WITH CACHE
 # ----------------------------------------
 @st.cache_resource
 def load_all_parquet():
@@ -61,22 +62,21 @@ def load_all_parquet():
     for ac_name, pq_file in FILE_MAP.items():
         try:
             df = pd.read_parquet(pq_file)
-
+            # Clean whitespace from key columns
             if "FM_NAME_V2" in df.columns:
                 df["FM_NAME_V2"] = df["FM_NAME_V2"].astype(str).str.strip()
-
             if "RLN_FM_NM_V2" in df.columns:
                 df["RLN_FM_NM_V2"] = df["RLN_FM_NM_V2"].astype(str).str.strip()
-
             data[ac_name] = df
-        except:
+        except Exception as e:
+            st.error(f"Failed loading {pq_file}: {e}")
             data[ac_name] = None
     return data
 
 DATA = load_all_parquet()
 
 # ----------------------------------------
-# SORT CONSTITUENCIES
+# SORT CONSTITUENCIES BY Number
 # ----------------------------------------
 sorted_keys = sorted(FILE_MAP.keys(), key=lambda x: int(x.split()[0]))
 
@@ -112,16 +112,15 @@ rname_input = st.text_input(
 )
 
 # ----------------------------------------
-# CLEAN INPUT
+# CLEAN INPUT FUNCTION
 # ----------------------------------------
 def clean(x):
     return " ".join(x.split()).strip()
 
 # ----------------------------------------
-# SEARCH
+# SEARCH BUTTON LOGIC
 # ----------------------------------------
 if st.button("🔍 தேடு (Search)"):
-
     name_input = clean(name_input)
     rname_input = clean(rname_input)
 
