@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import traceback
+import unicodedata
 
 # ----------------------------------------
 # PAGE SETTINGS + MOBILE CSS
@@ -28,16 +29,13 @@ input[type="text"] { font-size: 1.15rem; padding: 10px; }
 # ----------------------------------------
 # HEADER (WITH EXTRA SPACE)
 # ----------------------------------------
-st.markdown(
-    """
-    <div style='height:25px;'></div>
-    <h2 style='width:100%; text-align:center; font-size:1.6rem;
-               white-space:normal; line-height:2.2rem; margin-top:10px;'>
-        திருப்பூர் மாவட்ட வாக்காளர் விவரம் - 2002
-    </h2>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown("""
+<div style='height:25px;'></div>
+<h2 style='width:100%; text-align:center; font-size:1.6rem;
+           white-space:normal; line-height:2.2rem; margin-top:10px;'>
+    திருப்பூர் மாவட்ட வாக்காளர் விவரம் - 2002
+</h2>
+""", unsafe_allow_html=True)
 
 # ----------------------------------------
 # FILE MAP WITH TAMIL SPELLINGS
@@ -63,17 +61,17 @@ def load_all_parquet():
         try:
             df = pd.read_parquet(pq_file)
             # Clean whitespace from key columns
-            if "FM_NAME_V2" in df.columns:
-                df["FM_NAME_V2"] = df["FM_NAME_V2"].astype(str).str.strip()
-            if "RLN_FM_NM_V2" in df.columns:
-                df["RLN_FM_NM_V2"] = df["RLN_FM_NM_V2"].astype(str).str.strip()
+            for col in ["FM_NAME_V2", "RLN_FM_NM_V2"]:
+                if col in df.columns:
+                    df[col] = df[col].astype(str).str.strip()
             data[ac_name] = df
         except Exception as e:
             st.error(f"Failed loading {pq_file}: {e}")
             data[ac_name] = None
     return data
 
-DATA = load_all_parquet()
+with st.spinner("📦 Loading constituency data..."):
+    DATA = load_all_parquet()
 
 # ----------------------------------------
 # SORT CONSTITUENCIES BY Number
@@ -115,7 +113,10 @@ rname_input = st.text_input(
 # CLEAN INPUT FUNCTION
 # ----------------------------------------
 def clean(x):
-    return " ".join(x.split()).strip()
+    """Normalize whitespace and Unicode for Tamil."""
+    x = " ".join(x.split()).strip()
+    x = unicodedata.normalize("NFC", x)
+    return x
 
 # ----------------------------------------
 # SEARCH BUTTON LOGIC
@@ -131,7 +132,9 @@ if st.button("🔍 தேடு (Search)"):
     results = df.copy()
 
     def match(series, value):
-        return series.astype(str).str.contains(value, case=False, na=False, regex=False)
+        """Case-insensitive substring match, Unicode-safe."""
+        series_norm = series.astype(str).apply(lambda x: unicodedata.normalize("NFC", x))
+        return series_norm.str.contains(value, case=False, na=False, regex=False)
 
     if name_input:
         results = results[match(results["FM_NAME_V2"], name_input)]
@@ -144,3 +147,7 @@ if st.button("🔍 தேடு (Search)"):
     else:
         st.success(f"✔ {len(results)} பதிவுகள் கிடைத்தன.")
         st.dataframe(results, use_container_width=True)
+
+        # Download button
+        csv_data = results.to_csv(index=False).encode('utf-8-sig')
+        st.download_button("⬇️ பதிவுகளை CSV ஆக பதிவிறக்கவும்", csv_data, f"{ac}_voter_results.csv", "text/csv")
