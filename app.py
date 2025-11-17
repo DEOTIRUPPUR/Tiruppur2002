@@ -42,17 +42,14 @@ st.markdown(
 # FILE MAP WITH TAMIL SPELLINGS
 # ----------------------------------------
 FILE_MAP = {
-    "102 - அவநாசி (தனி) (AVANASHI (sc)": "AC_101_Mettupalayam.parquet",
-    "103 - தொண்டாமுத்தூர் (Thondamuthur)": "AC_103_Thondamuthur.parquet",
-    "104 - சிங்காநல்லூர் (Singanallur)": "AC_104_Singanallur.parquet",
-    "105 - கோயம்புத்தூர் மேற்கு (West)": "AC_105_Coimbatore(West).parquet",
-    "106 - கோயம்புத்தூர் கிழக்கு (East)": "AC_106_Coimbatore(East).parquet",
-    "107 - பேரூர் (Perur)": "AC_107_Perur.parquet",
-    "108 - கிணத்துக்கடவு (Kinathukadavu)": "AC_108_Kinathukadavu.parquet",
-    "109 - பொள்ளாச்சி (Pollachi)": "AC_109_Pollachi.parquet",
-    "110 - வால்பாறை (Valparai)": "AC_110_Valparai.parquet",
-    "114 - பொங்கலூர் (Pongalur)": "AC_114_Pongalur.parquet",
+    "102 - அவினாசி (தனி) (Avanashi (SC))": "AC_101_Mettupalayam.parquet",
+    "111 - உடுமலைப்பேட்டை (Udumalpet)": "AC_103_Thondamuthur.parquet",
+    "112 - தாராபுரம் (தனி) (Dharapuram (SC))": "AC_104_Singanallur.parquet",
+    "113 - வெள்ளகோவில் (Vellakoil)": "AC_105_Coimbatore(West).parquet",
+    "114 - பொங்கலூர் (Pongalur)": "AC_106_Coimbatore(East).parquet",
     "115 - பல்லடம் (Palladam)": "AC_115_Palladam.parquet",
+    "116 - திருப்பூர் (Tiruppur)": "AC_108_Kinathukadavu.parquet",
+    "117 - காங்கேயம் (Kangayam)": "AC_109_Pollachi.parquet",
 }
 
 # ----------------------------------------
