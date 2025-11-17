@@ -1,38 +1,76 @@
 import streamlit as st
 import pandas as pd
-import traceback
 import unicodedata
 
 # ----------------------------------------
-# PAGE SETTINGS + MOBILE CSS
+# PAGE SETTINGS
 # ----------------------------------------
-st.set_page_config(page_title="Coimbatore District Voter Search", layout="wide")
+st.set_page_config(page_title="Tiruppur District Voter Search", layout="wide")
 
+# ----------------------------------------
+# COLOR AND STYLE CSS
+# ----------------------------------------
 st.markdown("""
 <style>
-.block-container { padding-top: 1rem; padding-left: 0.6rem; padding-right: 0.6rem; }
-input[type="text"] { font-size: 1.15rem; padding: 10px; }
-.stButton > button { width: 100%; padding: 12px; font-size: 1.12rem; border-radius: 8px; }
-.stDataFrame { overflow-x: auto !important; }
-.dataframe td, .dataframe th {
-    white-space: normal !important;
-    word-break: break-word !important;
-    font-size: 1.05rem;
-    line-height: 1.35rem;
+/* Background color */
+body {
+    background-color: C2D9EA;
+    font-family: 'Segoe UI', sans-serif;
 }
-@media (max-width: 600px) {
-  .stDataFrame > div { min-width: 1100px !important; }
+
+/* Header style */
+h2 {
+    color: #e2e1fc;
+    text-align: center;
+    text-shadow: 1px 1px 2px #aaa;
+}
+
+/* Button style */
+.stButton > button {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 10px 20px;
+}
+.stButton > button:hover {
+    background-color: #45a049;
+}
+
+/* DataFrame style */
+.dataframe th {
+    background-color: #1f77b4;
+    color: white;
+    text-align: center;
+}
+.dataframe td {
+    color: #333;
+    text-align: center;
+}
+
+/* Input fields */
+input[type="text"] {
+    border: 2px solid #4CAF50;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 1rem;
+}
+
+/* Container padding */
+.block-container { 
+    padding-top: 1rem; 
+    padding-left: 0.6rem; 
+    padding-right: 0.6rem; 
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ----------------------------------------
-# HEADER (WITH EXTRA SPACE)
+# HEADER
 # ----------------------------------------
 st.markdown("""
-<div style='height:25px;'></div>
-<h2 style='width:100%; text-align:center; font-size:1.6rem;
-           white-space:normal; line-height:2.2rem; margin-top:10px;'>
+<div style='height:30px;'></div>
+<h2>
     திருப்பூர் மாவட்ட வாக்காளர் விவரம் - 2002
 </h2>
 """, unsafe_allow_html=True)
@@ -52,7 +90,7 @@ FILE_MAP = {
 }
 
 # ----------------------------------------
-# PRELOAD PARQUET FILES WITH CACHE
+# PRELOAD PARQUET FILES
 # ----------------------------------------
 @st.cache_resource
 def load_all_parquet():
@@ -60,7 +98,7 @@ def load_all_parquet():
     for ac_name, pq_file in FILE_MAP.items():
         try:
             df = pd.read_parquet(pq_file)
-            # Clean whitespace from key columns
+            # Clean whitespace for key columns
             for col in ["FM_NAME_V2", "RLN_FM_NM_V2"]:
                 if col in df.columns:
                     df[col] = df[col].astype(str).str.strip()
@@ -74,7 +112,7 @@ with st.spinner("📦 Loading constituency data..."):
     DATA = load_all_parquet()
 
 # ----------------------------------------
-# SORT CONSTITUENCIES BY Number
+# SORT CONSTITUENCIES
 # ----------------------------------------
 sorted_keys = sorted(FILE_MAP.keys(), key=lambda x: int(x.split()[0]))
 
@@ -119,7 +157,7 @@ def clean(x):
     return x
 
 # ----------------------------------------
-# SEARCH BUTTON LOGIC
+# SEARCH LOGIC
 # ----------------------------------------
 if st.button("🔍 தேடு (Search)"):
     name_input = clean(name_input)
@@ -146,8 +184,34 @@ if st.button("🔍 தேடு (Search)"):
         st.error("❌ பொருந்தும் பதிவுகள் இல்லை.")
     else:
         st.success(f"✔ {len(results)} பதிவுகள் கிடைத்தன.")
-        st.dataframe(results, use_container_width=True)
 
-        # Download button
+        # -------------------------------
+        # HIGHLIGHT SEARCH TERMS
+        # -------------------------------
+        def highlight_text(s, term):
+            """Wrap matching text with bold markdown for visibility."""
+            if not term:
+                return s
+            term = str(term)
+            return s.astype(str).apply(lambda x: x.replace(term, f'**{term}**'))
+
+        styled_df = results.copy()
+        if name_input:
+            styled_df["FM_NAME_V2"] = highlight_text(styled_df["FM_NAME_V2"], name_input)
+        if rname_input:
+            styled_df["RLN_FM_NM_V2"] = highlight_text(styled_df["RLN_FM_NM_V2"], rname_input)
+
+        # -------------------------------
+        # ALTERNATE ROW COLOR
+        # -------------------------------
+        def highlight_rows(row):
+            color = "#f0f8ff" if row.name % 2 == 0 else "#e6f2ff"
+            return ['background-color: {}'.format(color) for _ in row]
+
+        st.dataframe(styled_df.style.apply(highlight_rows, axis=1), use_container_width=True)
+
+        # -------------------------------
+        # DOWNLOAD CSV
+        # -------------------------------
         csv_data = results.to_csv(index=False).encode('utf-8-sig')
         st.download_button("⬇️ பதிவுகளை CSV ஆக பதிவிறக்கவும்", csv_data, f"{ac}_voter_results.csv", "text/csv")
