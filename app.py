@@ -1,77 +1,38 @@
 import streamlit as st
 import pandas as pd
+import traceback
 import unicodedata
 
 # ----------------------------------------
-# PAGE SETTINGS
+# PAGE SETTINGS + MOBILE CSS
 # ----------------------------------------
 st.set_page_config(page_title="Coimbatore District Voter Search", layout="wide")
 
-# ----------------------------------------
-# COLOR AND STYLE CSS
-# ----------------------------------------
 st.markdown("""
 <style>
-/* Background color */
-body {
-    background-color: #f0f4f7;
-    font-family: 'Segoe UI', sans-serif;
+.block-container { padding-top: 1rem; padding-left: 0.6rem; padding-right: 0.6rem; }
+input[type="text"] { font-size: 1.15rem; padding: 10px; }
+.stButton > button { width: 100%; padding: 12px; font-size: 1.12rem; border-radius: 8px; }
+.stDataFrame { overflow-x: auto !important; }
+.dataframe td, .dataframe th {
+    white-space: normal !important;
+    word-break: break-word !important;
+    font-size: 1.05rem;
+    line-height: 1.35rem;
 }
-
-/* Header style */
-h2 {
-    color: #1f4e79;
-    text-align: center;
-    text-shadow: 1px 1px 2px #aaa;
-}
-
-/* Button style */
-.stButton > button {
-    background-color: #4CAF50;
-    color: white;
-    font-weight: bold;
-    border-radius: 10px;
-    padding: 10px 20px;
-}
-.stButton > button:hover {
-    background-color: #45a049;
-}
-
-/* DataFrame style */
-.dataframe th {
-    background-color: #1f77b4;
-    color: white;
-    text-align: center;
-}
-.dataframe td {
-    background-color: #eaf2f8;
-    color: #333;
-    text-align: center;
-}
-
-/* Input fields */
-input[type="text"] {
-    border: 2px solid #4CAF50;
-    border-radius: 5px;
-    padding: 8px;
-    font-size: 1rem;
-}
-
-/* Container padding */
-.block-container { 
-    padding-top: 1rem; 
-    padding-left: 0.6rem; 
-    padding-right: 0.6rem; 
+@media (max-width: 600px) {
+  .stDataFrame > div { min-width: 1100px !important; }
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ----------------------------------------
-# HEADER
+# HEADER (WITH EXTRA SPACE)
 # ----------------------------------------
 st.markdown("""
 <div style='height:25px;'></div>
-<h2>
+<h2 style='width:100%; text-align:center; font-size:1.6rem;
+           white-space:normal; line-height:2.2rem; margin-top:10px;'>
     திருப்பூர் மாவட்ட வாக்காளர் விவரம் - 2002
 </h2>
 """, unsafe_allow_html=True)
@@ -91,7 +52,7 @@ FILE_MAP = {
 }
 
 # ----------------------------------------
-# PRELOAD PARQUET FILES
+# PRELOAD PARQUET FILES WITH CACHE
 # ----------------------------------------
 @st.cache_resource
 def load_all_parquet():
@@ -99,7 +60,7 @@ def load_all_parquet():
     for ac_name, pq_file in FILE_MAP.items():
         try:
             df = pd.read_parquet(pq_file)
-            # Clean whitespace for key columns
+            # Clean whitespace from key columns
             for col in ["FM_NAME_V2", "RLN_FM_NM_V2"]:
                 if col in df.columns:
                     df[col] = df[col].astype(str).str.strip()
@@ -113,7 +74,7 @@ with st.spinner("📦 Loading constituency data..."):
     DATA = load_all_parquet()
 
 # ----------------------------------------
-# SORT CONSTITUENCIES
+# SORT CONSTITUENCIES BY Number
 # ----------------------------------------
 sorted_keys = sorted(FILE_MAP.keys(), key=lambda x: int(x.split()[0]))
 
@@ -158,7 +119,7 @@ def clean(x):
     return x
 
 # ----------------------------------------
-# SEARCH LOGIC
+# SEARCH BUTTON LOGIC
 # ----------------------------------------
 if st.button("🔍 தேடு (Search)"):
     name_input = clean(name_input)
