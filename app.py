@@ -41,13 +41,13 @@ st.markdown("""
 # FILE MAP WITH TAMIL SPELLINGS
 # ----------------------------------------
 FILE_MAP = {
-    "102 - அவினாசி (தனி) (Avanashi (SC))": "AC_101_Mettupalayam.parquet",
-    "111 - உடுமலைப்பேட்டை (Udumalpet)": "AC_103_Thondamuthur.parquet",
-    "112 - தாராபுரம் (தனி) (Dharapuram (SC))": "AC_104_Singanallur.parquet",
-    "113 - வெள்ளகோவில் (Vellakoil)": "AC_105_Coimbatore(West).parquet",
+    "102 - அவினாசி (தனி) (Avanashi (SC))": "AC_102_Avanashi.parquet",
+    "111 - உடுமலைப்பேட்டை (Udumalpet)": "AC_111_Udumalpet.parquet",
+    "112 - தாராபுரம் (தனி) (Dharapuram (SC))": "AC_112_Dharapuram.parquet",
+    "113 - வெள்ளகோவில் (Vellakoil)": "AC_113_Vellakovil.parquet",
     "114 - பொங்கலூர் (Pongalur)": "AC_114_Pongalur.parquet",
     "115 - பல்லடம் (Palladam)": "AC_115_Palladam.parquet",
-    "116 - திருப்பூர் (Tiruppur)": "AC_108_Kinathukadavu.parquet",
+    "116 - திருப்பூர் (Tiruppur)": "AC_116_Tiruppur.parquet",
     "117 - காங்கேயம் (Kangayam)": "AC_117_Kangayam.parquet",
 }
 
