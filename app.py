@@ -1,9 +1,7 @@
 import streamlit as st
 import pandas as pd
 import unicodedata
-import html
 import pyarrow.parquet as pq
-import pyarrow as pa
 
 # -----------------------------------------------------
 # PAGE SETTINGS
@@ -19,13 +17,11 @@ body {
     background-color: #C2D9EA !important;
     font-family: 'Segoe UI', sans-serif;
 }
-
 h2 {
     color: #6a64ef;
     text-align: center;
     text-shadow: 1px 1px 2px #aaa;
 }
-
 .stButton > button {
     background-color: #c19962;
     color: white;
@@ -36,13 +32,11 @@ h2 {
 .stButton > button:hover {
     background-color: #45a049;
 }
-
 .block-container { 
     padding-top: 1rem; 
     padding-left: 0.6rem; 
     padding-right: 0.6rem; 
 }
-
 .dataframe th {
     background-color: #1f77b4 !important;
     color: white !important;
@@ -61,7 +55,6 @@ st.markdown("""
 <div style='height:45px;'></div>
 <h2 style='color:#b56edc;'>திருப்பூர் மாவட்ட வாக்காளர் விவரம் - 2002</h2>
 """, unsafe_allow_html=True)
-
 
 # -----------------------------------------------------
 # FILE MAPPING
@@ -98,11 +91,10 @@ def load_all_parquet():
 
 with st.spinner("📦 Loading constituency data..."):
     DATA = load_all_parquet()
-
-# ----------------------------------------
-# SORT CONSTITUENCIES BY Number
-# ----------------------------------------
-sorted_keys = sorted(FILE_MAP.keys(), key=lambda x: int(x.split()[0]))
+# -----------------------------------------------------
+# SORT CONSTITUENCIES BY NUMBER
+# -----------------------------------------------------
+sorted_keys = sorted(FILE_MAP.keys(), key=lambda x: int(x.split("-")[0].strip()))
 
 ac = st.selectbox(
     "தொகுதியைத் தேர்ந்தெடுக்கவும்:",
@@ -113,40 +105,31 @@ if ac == "-- Choose --":
     st.stop()
 
 df = DATA.get(ac)
-
 if df is None:
     st.error("❌ இந்த தொகுதி கோப்பை ஏற்ற முடியவில்லை.")
     st.stop()
 
 st.success(f"📌 {ac} — {len(df)} வரிசைகள் கிடைத்தன.")
 
-# ----------------------------------------
-# INPUT FIELDS
-# ----------------------------------------
+# -----------------------------------------------------
+# SEARCH INPUTS
+# -----------------------------------------------------
 st.markdown("### 📝 விவரங்களை உள்ளிடவும் (Enter Details)")
 
-name_input = st.text_input(
-    "வாக்காளர் பெயர் (Voter's Name) – தமிழ் மட்டும் (Tamil Only)",
-    placeholder="உதா: பிரகாஷ்"
-)
+name_input = st.text_input("வாக்காளர் பெயர் (Tamil Only)", placeholder="உதா: பிரகாஷ்")
+rname_input = st.text_input("தந்தை / கணவர் பெயர் (Tamil Only)", placeholder="உதா: வேலுசாமி")
 
-rname_input = st.text_input(
-    "தந்தை / கணவர் பெயர் (Father's / Husband's Name) – தமிழ் மட்டும் (Tamil Only)",
-    placeholder="உதா: வேலுசாமி"
-)
+# -----------------------------------------------------
+# INPUT CLEANING
+# -----------------------------------------------------
+def clean(text):
+    """Normalize unicode, lowercase, and remove extra spaces."""
+    text = " ".join(text.split()).strip()
+    return unicodedata.normalize("NFC", text).lower()
 
-# ----------------------------------------
-# CLEAN INPUT FUNCTION
-# ----------------------------------------
-def clean(x):
-    """Normalize whitespace and Unicode for Tamil."""
-    x = " ".join(x.split()).strip()
-    x = unicodedata.normalize("NFC", x)
-    return x
-
-# ----------------------------------------
-# SEARCH BUTTON LOGIC
-# ----------------------------------------
+# -----------------------------------------------------
+# SEARCH BUTTON
+# -----------------------------------------------------
 if st.button("🔍 தேடு (Search)"):
     name_input = clean(name_input)
     rname_input = clean(rname_input)
@@ -157,17 +140,14 @@ if st.button("🔍 தேடு (Search)"):
 
     results = df.copy()
 
-    def match(series, value):
-        """Case-insensitive substring match, Unicode-safe."""
-        series_norm = series.astype(str).apply(lambda x: unicodedata.normalize("NFC", x))
-        return series_norm.str.contains(value, case=False, na=False, regex=False)
-
+    # --- Search Logic ---
     if name_input:
-        results = results[match(results["FM_NAME_V2"], name_input)]
+        results = results[results["FM_NAME_NORM"].str.contains(name_input, na=False)]
 
     if rname_input:
-        results = results[match(results["RLN_FM_NM_V2"], rname_input)]
+        results = results[results["RLN_NAME_NORM"].str.contains(rname_input, na=False)]
 
+    # --- Results Display ---
     if results.empty:
         st.error("❌ பொருந்தும் பதிவுகள் இல்லை.")
     else:
@@ -176,4 +156,9 @@ if st.button("🔍 தேடு (Search)"):
 
         # Download button
         csv_data = results.to_csv(index=False).encode('utf-8-sig')
-        st.download_button("⬇️ பதிவுகளை CSV ஆக பதிவிறக்கவும்", csv_data, f"{ac}_voter_results.csv", "text/csv")
+        st.download_button(
+            "⬇️ பதிவுகளை CSV ஆக பதிவிறக்கவும்", 
+            csv_data, 
+            f"{ac}_voter_results.csv", 
+            "text/csv"
+        )
