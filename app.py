@@ -168,10 +168,6 @@ if st.button("🔍 தேடு (Search)"):
         st.dataframe(results, use_container_width=True)
 
         # CSV Download
-        csv_data = results.to_csv(index=False).encode('utf-8-sig')
-        st.download_button(
-            "⬇️ பதிவுகளை CSV ஆக பதிவிறக்கவும்",
-            csv_data,
-            f"{ac}_voter_results.csv",
-            "text/csv"
+        
         )
+
