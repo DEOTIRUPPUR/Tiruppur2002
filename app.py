@@ -1,50 +1,75 @@
 import streamlit as st
 import pandas as pd
-import traceback
 import unicodedata
+import html
+import pyarrow.parquet as pq
+import pyarrow as pa
 
-# ----------------------------------------
-# PAGE SETTINGS + MOBILE CSS
-# ----------------------------------------
-st.set_page_config(page_title="Coimbatore District Voter Search", layout="wide")
+# -----------------------------------------------------
+# PAGE SETTINGS
+# -----------------------------------------------------
+st.set_page_config(page_title="Tiruppur District Voter Search", layout="wide")
 
+# -----------------------------------------------------
+# CUSTOM CSS
+# -----------------------------------------------------
 st.markdown("""
 <style>
-.block-container { padding-top: 1rem; padding-left: 0.6rem; padding-right: 0.6rem; }
-input[type="text"] { font-size: 1.15rem; padding: 10px; }
-.stButton > button { width: 100%; padding: 12px; font-size: 1.12rem; border-radius: 8px; }
-.stDataFrame { overflow-x: auto !important; }
-.dataframe td, .dataframe th {
-    white-space: normal !important;
-    word-break: break-word !important;
-    font-size: 1.05rem;
-    line-height: 1.35rem;
+body {
+    background-color: #C2D9EA !important;
+    font-family: 'Segoe UI', sans-serif;
 }
-@media (max-width: 600px) {
-  .stDataFrame > div { min-width: 1100px !important; }
+
+h2 {
+    color: #6a64ef;
+    text-align: center;
+    text-shadow: 1px 1px 2px #aaa;
+}
+
+.stButton > button {
+    background-color: #c19962;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 10px 20px;
+}
+.stButton > button:hover {
+    background-color: #45a049;
+}
+
+.block-container { 
+    padding-top: 1rem; 
+    padding-left: 0.6rem; 
+    padding-right: 0.6rem; 
+}
+
+.dataframe th {
+    background-color: #1f77b4 !important;
+    color: white !important;
+    text-align: center !important;
+}
+.dataframe td {
+    text-align: center !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ----------------------------------------
-# HEADER (WITH EXTRA SPACE)
-# ----------------------------------------
+# -----------------------------------------------------
+# HEADER
+# -----------------------------------------------------
 st.markdown("""
-<div style='height:25px;'></div>
-<h2 style='width:100%; text-align:center; font-size:1.6rem;
-           white-space:normal; line-height:2.2rem; margin-top:10px;'>
-    திருப்பூர் மாவட்ட வாக்காளர் விவரம் - 2002
-</h2>
+<div style='height:45px;'></div>
+<h2>திருப்பூர் மாவட்ட வாக்காளர் விவரம் - 2002</h2>
 """, unsafe_allow_html=True)
 
-# ----------------------------------------
-# FILE MAP WITH TAMIL SPELLINGS
-# ----------------------------------------
+# -----------------------------------------------------
+# FILE MAPPING
+# -----------------------------------------------------
 FILE_MAP = {
-    "102 - அவினாசி (தனி) (Avanashi (SC))": "AC_101_Mettupalayam.parquet",
-    "111 - உடுமலைப்பேட்டை (Udumalpet)": "AC_103_Thondamuthur.parquet",
-    "112 - தாராபுரம் (தனி) (Dharapuram (SC))": "AC_104_Singanallur.parquet",
-    "113 - வெள்ளகோவில் (Vellakoil)": "AC_105_Coimbatore(West).parquet",
+    "102 - அவினாசி (தனி) (Avanashi (SC))": "AC_102_Avanashi.parquet",
+    "111 - உடுமலைப்பேட்டை (Udumalpet)": "AC_111_Udumalpet.parquet",
+    "112 - தாராபுரம் (தனி) (Dharapuram (SC))": "AC_112_Dharapuram.parquet",
+    "113 - வெள்ளகோவில் (Vellakoil)": "AC_113_Vellakovil.parquet",
     "114 - பொங்கலூர் (Pongalur)": "AC_114_Pongalur.parquet",
     "115 - பல்லடம் (Palladam)": "AC_115_Palladam.parquet",
     "116 - திருப்பூர் (Tiruppur)": "AC_116_Tiruppur.parquet",
