@@ -41,7 +41,7 @@ st.markdown("""
 # FILE MAP WITH CORRECT AC_102 FILE
 # ----------------------------------------
 FILE_MAP = {
-    "102 - அவினாசி (தனி) (Avanashi (SC))": "AC_102_Avanashi.parquet",
+    "102 - அவினாசி (தனி) (Avanashi (SC))": "AC_101_Mettupalayam.parquet",
     "111 - உடுமலைப்பேட்டை (Udumalpet)": "AC_111_Udumalpet.parquet",
     "112 - தாராபுரம் (தனி) (Dharapuram (SC))": "AC_112_Dharapuram.parquet",
     "113 - வெள்ளகோவில் (Vellakoil)": "AC_113_Vellakovil.parquet",
@@ -155,3 +155,4 @@ if st.button("🔍 தேடு (Search)"):
             f"{ac}_voter_results.csv",
             "text/csv"
         )
+
