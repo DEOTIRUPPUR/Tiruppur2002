@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import unicodedata
-import pyarrow.parquet as pq
-import pyarrow as pa
 
 # -----------------------------------------------------
 # PAGE SETTINGS
@@ -76,7 +74,7 @@ FILE_MAP = {
 }
 
 # -----------------------------------------------------
-# DATA LOADING WITH PRE-NORMALIZED COLUMNS
+# DATA LOADING
 # -----------------------------------------------------
 @st.cache_resource
 def load_all_parquet():
@@ -100,7 +98,6 @@ def load_all_parquet():
         except Exception as e:
             st.error(f"❌ Failed loading {pq_file}: {e}")
             data[ac_name] = None
-
     return data
 
 
@@ -112,10 +109,7 @@ with st.spinner("📦 Loading constituency data..."):
 # -----------------------------------------------------
 sorted_keys = sorted(FILE_MAP.keys(), key=lambda x: int(x.split("-")[0].strip()))
 
-ac = st.selectbox(
-    "தொகுதியைத் தேர்ந்தெடுக்கவும்:",
-    ["-- Choose --"] + sorted_keys
-)
+ac = st.selectbox("தொகுதியைத் தேர்ந்தெடுக்கவும்:", ["-- Choose --"] + sorted_keys)
 
 if ac == "-- Choose --":
     st.stop()
@@ -139,10 +133,8 @@ rname_input = st.text_input("தந்தை / கணவர் பெயர் (
 # INPUT CLEANING
 # -----------------------------------------------------
 def clean(x):
-    """Normalize unicode & remove extra spaces."""
     x = " ".join(x.split()).strip()
     return unicodedata.normalize("NFC", x)
-
 
 # -----------------------------------------------------
 # SEARCH BUTTON
@@ -158,25 +150,25 @@ if st.button("🔍 தேடு (Search)"):
 
     results = df.copy()
 
-    # --- Search Logic (fast) ---
+    # SEARCH LOGIC
     if name_input:
         results = results[results["FM_NAME_NORM"].str.contains(name_input, case=False, na=False)]
 
     if rname_input:
         results = results[results["RLN_NAME_NORM"].str.contains(rname_input, case=False, na=False)]
 
-    # --- Results Display ---
+    # SHOW RESULTS
     if results.empty:
         st.error("❌ பொருந்தும் பதிவுகள் இல்லை.")
     else:
         st.success(f"✔ {len(results)} பதிவுகள் கிடைத்தன.")
         st.dataframe(results, use_container_width=True)
 
-        # Download
-        csv_data = results.to_csv(index=False).encode('utf-8-sig')
+        # CSV DOWNLOAD
+        csv_data = results.to_csv(index=False).encode("utf-8-sig")
         st.download_button(
-            "⬇️ பதிவுகளை CSV ஆக பதிவிறக்கவும்", 
-            csv_data, 
-            f"{ac}_voter_results.csv", 
+            "⬇️ பதிவுகளை CSV ஆக பதிவிறக்கவும்",
+            csv_data,
+            f"{ac}_voter_results.csv",
             "text/csv"
         )
