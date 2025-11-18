@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import unicodedata
 import pyarrow.parquet as pq
+import pyarrow as pa
 
 # -----------------------------------------------------
 # PAGE SETTINGS
@@ -17,11 +18,13 @@ body {
     background-color: #C2D9EA !important;
     font-family: 'Segoe UI', sans-serif;
 }
+
 h2 {
     color: #6a64ef;
     text-align: center;
     text-shadow: 1px 1px 2px #aaa;
 }
+
 .stButton > button {
     background-color: #c19962;
     color: white;
@@ -32,11 +35,13 @@ h2 {
 .stButton > button:hover {
     background-color: #45a049;
 }
+
 .block-container { 
     padding-top: 1rem; 
     padding-left: 0.6rem; 
     padding-right: 0.6rem; 
 }
+
 .dataframe th {
     background-color: #1f77b4 !important;
     color: white !important;
@@ -80,15 +85,15 @@ def load_all_parquet():
         try:
             df = pd.read_parquet(pq_file).copy()
 
-            # Normalize Tamil columns
+            # Clean + normalize Tamil columns
             for col in ["FM_NAME_V2", "RLN_FM_NM_V2"]:
                 if col in df.columns:
                     df[col] = df[col].astype(str).str.strip()
                     df[col] = df[col].apply(lambda x: unicodedata.normalize("NFC", x))
 
-            # Pre-normalized lowercase columns for fast search
-            df["FM_NAME_NORM"] = df["FM_NAME_V2"].apply(lambda x: unicodedata.normalize("NFC", x).lower())
-            df["RLN_NAME_NORM"] = df["RLN_FM_NM_V2"].apply(lambda x: unicodedata.normalize("NFC", x).lower())
+            # Pre-normalized columns for fast search
+            df["FM_NAME_NORM"] = df["FM_NAME_V2"].apply(lambda x: unicodedata.normalize("NFC", x))
+            df["RLN_NAME_NORM"] = df["RLN_FM_NM_V2"].apply(lambda x: unicodedata.normalize("NFC", x))
 
             data[ac_name] = df
 
@@ -97,6 +102,7 @@ def load_all_parquet():
             data[ac_name] = None
 
     return data
+
 
 with st.spinner("📦 Loading constituency data..."):
     DATA = load_all_parquet()
@@ -132,15 +138,17 @@ rname_input = st.text_input("தந்தை / கணவர் பெயர் (
 # -----------------------------------------------------
 # INPUT CLEANING
 # -----------------------------------------------------
-def clean(text):
-    """Normalize unicode, lowercase, and remove extra spaces."""
-    text = " ".join(text.split()).strip()
-    return unicodedata.normalize("NFC", text).lower()
+def clean(x):
+    """Normalize unicode & remove extra spaces."""
+    x = " ".join(x.split()).strip()
+    return unicodedata.normalize("NFC", x)
+
 
 # -----------------------------------------------------
 # SEARCH BUTTON
 # -----------------------------------------------------
 if st.button("🔍 தேடு (Search)"):
+
     name_input = clean(name_input)
     rname_input = clean(rname_input)
 
@@ -150,12 +158,12 @@ if st.button("🔍 தேடு (Search)"):
 
     results = df.copy()
 
-    # --- Search Logic ---
+    # --- Search Logic (fast) ---
     if name_input:
-        results = results[results["FM_NAME_NORM"].str.contains(name_input, na=False)]
+        results = results[results["FM_NAME_NORM"].str.contains(name_input, case=False, na=False)]
 
     if rname_input:
-        results = results[results["RLN_NAME_NORM"].str.contains(rname_input, na=False)]
+        results = results[results["RLN_NAME_NORM"].str.contains(rname_input, case=False, na=False)]
 
     # --- Results Display ---
     if results.empty:
@@ -164,7 +172,7 @@ if st.button("🔍 தேடு (Search)"):
         st.success(f"✔ {len(results)} பதிவுகள் கிடைத்தன.")
         st.dataframe(results, use_container_width=True)
 
-        # Download button
+        # Download
         csv_data = results.to_csv(index=False).encode('utf-8-sig')
         st.download_button(
             "⬇️ பதிவுகளை CSV ஆக பதிவிறக்கவும்", 
