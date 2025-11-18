@@ -10,8 +10,7 @@ st.set_page_config(page_title="Tiruppur District Voter Search", layout="wide")
 
 st.markdown("""
 <style>
-body {
-    background-color: #C2D9EA !important;
+.stApp {background-color: #C2D9EA !important;
     font-family: 'Segoe UI', sans-serif;
 }
 
@@ -170,6 +169,7 @@ if st.button("🔍 தேடு (Search)"):
         # CSV Download
         
         
+
 
 
 
