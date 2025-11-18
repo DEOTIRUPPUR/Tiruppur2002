@@ -27,7 +27,7 @@ input[type="text"] { font-size: 1.15rem; padding: 10px; }
 """, unsafe_allow_html=True)
 
 # ----------------------------------------
-# HEADER (WITH EXTRA SPACE)
+# HEADER
 # ----------------------------------------
 st.markdown("""
 <div style='height:25px;'></div>
@@ -38,10 +38,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ----------------------------------------
-# FILE MAP WITH TAMIL SPELLINGS
+# FILE MAP WITH CORRECT AC_102 FILE
 # ----------------------------------------
 FILE_MAP = {
-    "102 - அவினாசி (தனி) (Avanashi (SC))": "AC_101_Mettupalayam.parquet",
+    "102 - அவினாசி (தனி) (Avanashi (SC))": "AC_102_Avanashi.parquet",
     "111 - உடுமலைப்பேட்டை (Udumalpet)": "AC_111_Udumalpet.parquet",
     "112 - தாராபுரம் (தனி) (Dharapuram (SC))": "AC_112_Dharapuram.parquet",
     "113 - வெள்ளகோவில் (Vellakoil)": "AC_113_Vellakovil.parquet",
@@ -52,7 +52,7 @@ FILE_MAP = {
 }
 
 # ----------------------------------------
-# PRELOAD PARQUET FILES WITH CACHE
+# LOAD PARQUET FILES (CACHED)
 # ----------------------------------------
 @st.cache_resource
 def load_all_parquet():
@@ -60,13 +60,13 @@ def load_all_parquet():
     for ac_name, pq_file in FILE_MAP.items():
         try:
             df = pd.read_parquet(pq_file)
-            # Clean whitespace from key columns
+            # Clean whitespace
             for col in ["FM_NAME_V2", "RLN_FM_NM_V2"]:
                 if col in df.columns:
                     df[col] = df[col].astype(str).str.strip()
             data[ac_name] = df
         except Exception as e:
-            st.error(f"Failed loading {pq_file}: {e}")
+            st.error(f"❌ Failed loading {pq_file}: {e}")
             data[ac_name] = None
     return data
 
@@ -74,7 +74,7 @@ with st.spinner("📦 Loading constituency data..."):
     DATA = load_all_parquet()
 
 # ----------------------------------------
-# SORT CONSTITUENCIES BY Number
+# SORT CONSTITUENCIES BY NUMBER
 # ----------------------------------------
 sorted_keys = sorted(FILE_MAP.keys(), key=lambda x: int(x.split()[0]))
 
@@ -95,33 +95,33 @@ if df is None:
 st.success(f"📌 {ac} — {len(df)} வரிசைகள் கிடைத்தன.")
 
 # ----------------------------------------
-# INPUT FIELDS
+# USER INPUT
 # ----------------------------------------
 st.markdown("### 📝 விவரங்களை உள்ளிடவும் (Enter Details)")
 
 name_input = st.text_input(
-    "வாக்காளர் பெயர் (Voter's Name) – தமிழ் மட்டும் (Tamil Only)",
+    "வாக்காளர் பெயர் (Voter's Name) – தமிழ் மட்டும்",
     placeholder="உதா: பிரகாஷ்"
 )
 
 rname_input = st.text_input(
-    "தந்தை / கணவர் பெயர் (Father's / Husband's Name) – தமிழ் மட்டும் (Tamil Only)",
+    "தந்தை / கணவர் பெயர் – தமிழ் மட்டும்",
     placeholder="உதா: வேலுசாமி"
 )
 
 # ----------------------------------------
-# CLEAN INPUT FUNCTION
+# CLEAN INPUT
 # ----------------------------------------
 def clean(x):
-    """Normalize whitespace and Unicode for Tamil."""
     x = " ".join(x.split()).strip()
     x = unicodedata.normalize("NFC", x)
     return x
 
 # ----------------------------------------
-# SEARCH BUTTON LOGIC
+# SEARCH
 # ----------------------------------------
 if st.button("🔍 தேடு (Search)"):
+
     name_input = clean(name_input)
     rname_input = clean(rname_input)
 
@@ -132,7 +132,6 @@ if st.button("🔍 தேடு (Search)"):
     results = df.copy()
 
     def match(series, value):
-        """Case-insensitive substring match, Unicode-safe."""
         series_norm = series.astype(str).apply(lambda x: unicodedata.normalize("NFC", x))
         return series_norm.str.contains(value, case=False, na=False, regex=False)
 
@@ -148,6 +147,11 @@ if st.button("🔍 தேடு (Search)"):
         st.success(f"✔ {len(results)} பதிவுகள் கிடைத்தன.")
         st.dataframe(results, use_container_width=True)
 
-        # Download button
+        # CSV Download
         csv_data = results.to_csv(index=False).encode('utf-8-sig')
-        st.download_button("⬇️ பதிவுகளை CSV ஆக பதிவிறக்கவும்", csv_data, f"{ac}_voter_results.csv", "text/csv")
+        st.download_button(
+            "⬇️ பதிவுகளை CSV ஆக பதிவிறக்கவும்",
+            csv_data,
+            f"{ac}_voter_results.csv",
+            "text/csv"
+        )
