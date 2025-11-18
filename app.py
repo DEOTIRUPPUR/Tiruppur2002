@@ -53,7 +53,8 @@ h2 {
 # HEADER
 # -----------------------------------------------------
 st.markdown("""
-<div style='height:45px;'></div>
+<div style='height:45px;
+style='color:#b56edc;'></div>
 <h2 style='color:#b56edc;'>திருப்பூர் மாவட்ட வாக்காளர் விவரம் - 2002</h2>
 """, unsafe_allow_html=True)
 
@@ -170,5 +171,6 @@ if st.button("🔍 தேடு (Search)"):
         # CSV Download
         
         
+
 
 
