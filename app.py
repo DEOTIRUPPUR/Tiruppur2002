@@ -59,8 +59,9 @@ h2 {
 # -----------------------------------------------------
 st.markdown("""
 <div style='height:45px;'></div>
-<h2 style='background-color:lavender; padding:10px;'>திருப்பூர் மாவட்ட வாக்காளர் விவரம் - 2002</h2>
+<h2 style='color:#E6E6FA;'>திருப்பூர் மாவட்ட வாக்காளர் விவரம் - 2002</h2>
 """, unsafe_allow_html=True)
+
 
 # -----------------------------------------------------
 # FILE MAPPING
