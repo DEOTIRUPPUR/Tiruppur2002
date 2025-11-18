@@ -6,7 +6,7 @@ import unicodedata
 # ----------------------------------------
 # PAGE SETTINGS + MOBILE CSS
 # ----------------------------------------
-st.set_page_config(page_title="Coimbatore District Voter Search", layout="wide")
+st.set_page_config(page_title="Tiruppur District Voter Search", layout="wide")
 
 st.markdown("""
 <style>
