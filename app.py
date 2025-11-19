@@ -166,9 +166,18 @@ if st.button("🔍 தேடு (Search)"):
         st.success(f"✔ {len(results)} பதிவுகள் கிடைத்தன.")
         st.dataframe(results, use_container_width=True)
 
-        # CSV Download
+        # Hide dataframe toolbar (download/search/fullscreen)
+hide_dataframe_toolbar = """
+<style>
+[data-testid="stElementToolbar"] {
+    display: none;
+}
+</style>
+"""
+st.markdown(hide_dataframe_toolbar, unsafe_allow_html=True)
         
         
+
 
 
 
