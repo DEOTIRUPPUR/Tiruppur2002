@@ -175,8 +175,27 @@ hide_dataframe_toolbar = """
 </style>
 """
 st.markdown(hide_dataframe_toolbar, unsafe_allow_html=True)
+
+
+disable_copy = """
+<style>
+/* Disable text selection inside dataframes */
+[data-testid="stDataFrame"] * {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
+
+/* Disable right-click to prevent context menu copy */
+body {
+    -webkit-touch-callout: none;
+}
+</style>
+"""
+st.markdown(disable_copy, unsafe_allow_html=True)
+
         
         
+
 
 
 
